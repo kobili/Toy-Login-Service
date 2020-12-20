@@ -1,8 +1,12 @@
 import {userFilePath, readDB} from './db';
+
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+ 
 
 interface User {
     email: string,
+    id: string,
     password: string
 }
 
@@ -22,8 +26,11 @@ function addNewUser(email: string, password: string): User | null {
         return null;
     }
 
+    let userID = uuidv4();
+
     let newUser: User = {
         "email": email,
+        "id": userID,
         "password": password
     };
 
