@@ -1,13 +1,14 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
-import {createDB, addNewUser, findUser} from './persistence';
+import {addNewUser, findUser} from './User';
+import {connectDB} from './db'
 
 const app: Application = express();
 
 app.use(bodyParser.json())      // parse application/json data
 
-// initialize user data
-createDB();
+// connect to database
+connectDB();
 
 /**
  * create a new user with an email and password

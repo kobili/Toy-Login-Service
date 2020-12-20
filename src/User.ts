@@ -1,40 +1,5 @@
-import fs from "fs";
-import path, { dirname } from "path";
-
-let dataPath = path.join(__dirname, "..", "data");
-let userFilePath = path.join(dataPath, "users.json");
-
-/**
- * create a json file to house all users' data if one doesn't already exist
- * file will be located at "../data/"
- */
-function createDB() {
-    // check if user data already exists
-    if (fs.existsSync(userFilePath)) {
-
-        console.log("Reading existing User Database");
-        return;
-
-    } else {
-
-        // create an empty user database
-        let users: object[] = [];
-        if (!fs.existsSync(dataPath)) {
-            fs.mkdirSync(dataPath);
-        }
-        fs.writeFileSync(userFilePath, JSON.stringify(users));
-        console.log("User database generated!");
-
-    }
-}
-
-/**
- * reads the JSON object stored in the json file housing user data
- */
-function readDB(): object[] {
-    let users: object[] = JSON.parse(fs.readFileSync(userFilePath, "utf-8"));
-    return users;
-}
+import {userFilePath, readDB} from './db';
+import fs from 'fs';
 
 /**
  * @param email: the user's email
@@ -84,4 +49,4 @@ function findUser(email: string): object | null  {
     return null;
 }
 
-export {createDB, addNewUser, findUser};
+export {addNewUser, findUser};
