@@ -2,7 +2,7 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import bcrypt from 'bcrypt';
 
-import {addNewUser, findUser} from './User';
+import {addNewUser, findUser, User} from './User';
 import {connectDB} from './db'
 
 const app: Application = express();
@@ -32,8 +32,8 @@ app.post("/api/v1/user/register", (req: Request, res: Response) => {
             return res.status(500).send({err: "Problem registering user"});
         }
 
-        addNewUser(email, hash);
-        return res.status(200).send({"email": email, "password": hash});
+        let newUser = addNewUser(email, hash);
+        return res.status(200).send(newUser);
     })
 
 });
@@ -46,7 +46,7 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
     let email: string = req.body.email;
     let password: string = req.body.password;
 
-    let user: any = findUser(email);     // the user with the corresponding email
+    let user: User | null = findUser(email);     // the user with the corresponding email
 
     if (!user) {
         return res.status(404).send({err: `No user found with email ${email}`});
@@ -55,7 +55,7 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
     // determine if the email and password are correct
     bcrypt.compare(email + password, user.password, (err, result) => {
         if (err) {
-            return res.status(500).send({err: "There was a problem with logging you in :("});
+            return res.status(500).send({err: "There was a problem with logging you in"});
         }
 
         if (result) {

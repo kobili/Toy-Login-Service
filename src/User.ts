@@ -1,6 +1,11 @@
 import {userFilePath, readDB} from './db';
 import fs from 'fs';
 
+interface User {
+    email: string,
+    password: string
+}
+
 /**
  * @param email: the user's email
  * @param password : the user's password (TODO: add password encrypting)
@@ -8,8 +13,8 @@ import fs from 'fs';
  * Returns the newly added user on success
  * Returns null on failure
  */
-function addNewUser(email: string, password: string): object | null {
-    let users: object[] = readDB();
+function addNewUser(email: string, password: string): User | null {
+    let users: User[] = readDB();
 
     // ensure no two users can have the same email
     if (findUser(email) != null) {
@@ -17,7 +22,7 @@ function addNewUser(email: string, password: string): object | null {
         return null;
     }
 
-    let newUser: object = {
+    let newUser: User = {
         "email": email,
         "password": password
     };
@@ -35,8 +40,8 @@ function addNewUser(email: string, password: string): object | null {
  * Returns the user object with the corresponding email if it exists
  * Otherwise return null
  */
-function findUser(email: string): object | null  {
-    let users: any[] = readDB();
+function findUser(email: string): User | null  {
+    let users: User[] = readDB();
 
     // iterate through each existing user and see if one of them has the given email
     for (let user of users) {
@@ -49,4 +54,4 @@ function findUser(email: string): object | null  {
     return null;
 }
 
-export {addNewUser, findUser};
+export {addNewUser, findUser, User};

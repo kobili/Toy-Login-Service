@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import {User} from './User'
 
 let dataPath = path.join(__dirname, "..", "data");
 let userFilePath = path.join(dataPath, "users.json");
@@ -31,8 +32,8 @@ function connectDB() {
 /**
  * reads the JSON object stored in the json file housing user data
  */
-function readDB(): object[] {
-    let users: object[] = JSON.parse(fs.readFileSync(userFilePath, "utf-8"));
+function readDB(): User[] {
+    let users: User[] = JSON.parse(fs.readFileSync(userFilePath, "utf-8"));
     return users;
 }
 
