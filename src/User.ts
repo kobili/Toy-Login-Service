@@ -42,17 +42,17 @@ function addNewUser(email: string, password: string): User | null {
 }
 
 /**
- * @param email : the email of the user to be found
+ * @param emailOrID : the email or id of the user to be found
  * Finds the user with the given email in the database
  * Returns the user object with the corresponding email if it exists
  * Otherwise return null
  */
-function findUser(email: string): User | null  {
+function findUser(emailOrID: string): User | null  {
     let users: User[] = readDB();
 
     // iterate through each existing user and see if one of them has the given email
     for (let user of users) {
-        if (user.email === email) {
+        if (user.email === emailOrID || user.id === emailOrID) {
             return user;
         }
     }

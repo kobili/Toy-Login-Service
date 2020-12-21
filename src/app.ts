@@ -9,6 +9,7 @@ import {connectDB} from './db'
 const app: Application = express();
 
 app.use(bodyParser.json())      // parse application/json data
+app.use(bodyParser.urlencoded({ extended: false })); // parse url encoded data
 
 const superSecretAuthKey: string = "secret";        // the key used to sign and verify JWT tokens (dont tell anyone)
 
@@ -75,6 +76,34 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
     });
 });
 
+/**
+ * gets the information of the user currently logged in
+ * Requires the token to be sent in the Request header as x-access-token
+ * If the token is valid - then a response with status 200 is sent with the email and uuid of the user
+ * If the token is invalid or missing then a response with status 401 is sent
+ */
+ app.get("/api/v1/user/me", (req: Request, res: Response) => {
+    let token: any = req.headers['x-access-token'];
 
+    if (!token) {
+        return res.status(401).send({err: "No token provided. Please sign in"});
+    }
+
+    // verify the provided token
+    // decoded["id"] will be the id of the user corresponding to the key
+    jwt.verify(token, superSecretAuthKey, (err: any, decoded: any) => {
+        if (err) {
+            return res.status(500).send({err: "Error verifying token"});
+        }
+
+        let user = findUser(decoded["id"]);
+
+        if (!user) {
+            return res.status(401).send({err: "Invalid token: Try signing in again"});
+        }
+
+        return res.status(200).send({email: user?.email, id: user?.id});
+    });
+ });
 
 app.listen(5000, () => console.log("Server running @ http://localhost:5000"));
