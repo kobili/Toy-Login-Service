@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-import {addNewUser, findUser, User} from './User';
+import {addNewUser, findUserByEmail, findUserByID, User} from './User';
 import {connectDB} from './db'
 
 const app: Application = express();
@@ -24,7 +24,7 @@ connectDB();
 app.post("/api/v1/user/register", (req: Request, res: Response) => {
 
     let email: string = req.body.email;
-    if (findUser(email)) {
+    if (findUserByEmail(email)) {
         return res.status(409).send({error: "Error: User already exists"});
     }
 
@@ -49,7 +49,7 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
     let email: string = req.body.email;
     let password: string = req.body.password;
 
-    let user: User | null = findUser(email);     // the user with the corresponding email
+    let user: User | null = findUserByEmail(email);     // the user with the corresponding email
 
     if (!user) {
         return res.status(404).send({err: `No user found with email ${email}`});
@@ -66,9 +66,9 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
 
             // sign an auth token that expires in 24 hours
             // the payload is the id of the user trying to sign in
-            let authToken = jwt.sign({id: user?.id}, superSecretAuthKey, {expiresIn: 86400}); 
+            let authToken = jwt.sign({id: user?.id}, superSecretAuthKey, {expiresIn: "24h"}); 
 
-            return res.status(200).send({token: authToken});
+            return res.status(200).send({message: "Authentication successful", token: authToken});
 
         } else {
             return res.status(401).send({err: `Incorrect password for user: ${email}`});
@@ -82,28 +82,43 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
  * If the token is valid - then a response with status 200 is sent with the email and uuid of the user
  * If the token is invalid or missing then a response with status 401 is sent
  */
- app.get("/api/v1/user/me", (req: Request, res: Response) => {
-    let token: any = req.headers['x-access-token'];
+ app.get("/api/v1/user/me", verifyToken, (req: Request, res: Response) => {
 
-    if (!token) {
-        return res.status(401).send({err: "No token provided. Please sign in"});
+    let uuid: string = req.body.ID;
+    let user = findUserByID(uuid);
+
+    if (!user) {
+        return res.status(404).send({err: "user not found"});
     }
 
+    return res.status(200).send({email: user.email, id: user.id});
+
+
+ });
+
+ /**
+  * Middleware which checks to see if the auth token is valid
+  * If it is valid then attaches the decoded userID to the request body in a field called ID and calls the next function
+  * If it is invalid then sends a 401 and a payload with details about the error
+  */
+ function verifyToken(req: Request, res: Response, next: NextFunction) {
+     let token: any = req.headers['x-access-token'];
+
+     if (!token) {
+         // if the token is missing
+         return res.status(401).send({err: "No token provided. Please sign in"});
+     }
+
     // verify the provided token
-    // decoded["id"] will be the id of the user corresponding to the key
     jwt.verify(token, superSecretAuthKey, (err: any, decoded: any) => {
         if (err) {
-            return res.status(500).send({err: "Error verifying token"});
+            // if the token is invalid or expired
+            return res.status(401).send({err: err});
         }
 
-        let user = findUser(decoded["id"]);
-
-        if (!user) {
-            return res.status(401).send({err: "Invalid token: Try signing in again"});
-        }
-
-        return res.status(200).send({email: user?.email, id: user?.id});
+        req.body.ID = decoded.id;
+        next();
     });
- });
+ }
 
 app.listen(5000, () => console.log("Server running @ http://localhost:5000"));

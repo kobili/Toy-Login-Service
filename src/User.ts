@@ -21,7 +21,7 @@ function addNewUser(email: string, password: string): User | null {
     let users: User[] = readDB();
 
     // ensure no two users can have the same email
-    if (findUser(email) != null) {
+    if (findUserByEmail(email) != null) {
         console.log("User already exists");
         return null;
     }
@@ -42,17 +42,17 @@ function addNewUser(email: string, password: string): User | null {
 }
 
 /**
- * @param emailOrID : the email or id of the user to be found
+ * @param email : the email of the user to be found
  * Finds the user with the given email in the database
  * Returns the user object with the corresponding email if it exists
  * Otherwise return null
  */
-function findUser(emailOrID: string): User | null  {
+function findUserByEmail(email: string): User | null  {
     let users: User[] = readDB();
 
     // iterate through each existing user and see if one of them has the given email
     for (let user of users) {
-        if (user.email === emailOrID || user.id === emailOrID) {
+        if (user.email === email) {
             return user;
         }
     }
@@ -61,4 +61,24 @@ function findUser(emailOrID: string): User | null  {
     return null;
 }
 
-export {addNewUser, findUser, User};
+/**
+ * @param uuid : the id of the user to be found
+ * Finds the user with the given id in the database
+ * Returns the user object with the corresponding id if it exists
+ * Otherwise return null
+ */
+function findUserByID(uuid: string): User | null {
+    let users: User[] = readDB();
+
+    // iterate through each existing user and see if one of them has the given email
+    for (let user of users) {
+        if (user.id === uuid) {
+            return user;
+        }
+    }
+
+    // no user found
+    return null;
+}
+
+export {addNewUser, findUserByEmail, findUserByID, User};
