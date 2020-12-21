@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import bodyParser from 'body-parser';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 import {addNewUser, findUser, User} from './User';
 import {connectDB} from './db'
@@ -8,6 +9,8 @@ import {connectDB} from './db'
 const app: Application = express();
 
 app.use(bodyParser.json())      // parse application/json data
+
+const superSecretAuthKey: string = "secret";        // the key used to sign and verify JWT tokens (dont tell anyone)
 
 // connect to database
 connectDB();
@@ -33,9 +36,8 @@ app.post("/api/v1/user/register", (req: Request, res: Response) => {
         }
 
         let newUser = addNewUser(email, hash);
-        return res.status(200).send(newUser);
-    })
-
+        return res.status(200).send({email: newUser?.email, id: newUser?.id});
+    });
 });
 
 /**
@@ -59,14 +61,20 @@ app.post("/api/v1/user/login", (req: Request, res: Response) => {
         }
 
         if (result) {
-            // TODO: add jwt signing on successful login
             console.log("Authentication successful");
-            return res.status(501).send({err: "Authentication successful; Signing not yet implemented"});
+
+            // sign an auth token that expires in 24 hours
+            // the payload is the id of the user trying to sign in
+            let authToken = jwt.sign({id: user?.id}, superSecretAuthKey, {expiresIn: 86400}); 
+
+            return res.status(200).send({token: authToken});
+
         } else {
             return res.status(401).send({err: `Incorrect password for user: ${email}`});
         }
     });
 });
+
 
 
 app.listen(5000, () => console.log("Server running @ http://localhost:5000"));
