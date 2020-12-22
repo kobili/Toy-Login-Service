@@ -1,4 +1,4 @@
-import express, { Application, Request, Response, NextFunction, Router } from 'express';
+import express, { Application } from 'express';
 
 import {connectDB} from './db'
 import {router as UserRoute} from './UserRoute'
