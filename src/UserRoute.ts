@@ -7,8 +7,8 @@ import {addNewUser, findUserByEmail, findUserByID, User} from './User';
 
 const router: Router = express.Router();
 
-router.use(bodyParser.json())                               // parse application/json data
-router.use(bodyParser.urlencoded({ extended: false }));     // parse url encoded data
+router.use(express.json())                               // parse application/json data
+router.use(express.urlencoded({ extended: false }));     // parse url encoded data
 
 const superSecretAuthKey: string = "secret";                // the key used to sign and verify JWT tokens (dont tell anyone)
 
