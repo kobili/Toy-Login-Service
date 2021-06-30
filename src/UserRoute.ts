@@ -62,7 +62,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
             // sign an auth token that expires in 24 hours
             // the payload is the id of the user trying to sign in
-            let authToken = jwt.sign({id: user?.uid}, superSecretAuthKey, {expiresIn: "24h"}); 
+            let authToken = jwt.sign({uid: user?.uid}, superSecretAuthKey, {expiresIn: "24h"}); 
 
             return res.status(200).send({message: "Authentication successful", token: authToken});
 
@@ -80,14 +80,14 @@ router.post("/login", async (req: Request, res: Response) => {
  */
  router.get("/me", verifyToken, async (req: Request, res: Response) => {
 
-    let uuid: string = req.body.ID;
+    let uuid: string = req.body.uid;
     let user : User | null = await findUserByID(uuid);
 
     if (!user) {
         return res.status(404).send({err: "user not found"});
     }
 
-    return res.status(200).send({email: user.email, id: user.uid});
+    return res.status(200).send({email: user.email, uid: user.uid});
  });
 
  /**
@@ -110,7 +110,7 @@ router.post("/login", async (req: Request, res: Response) => {
             return res.status(401).send({err: err});
         }
 
-        req.body.ID = decoded.id;
+        req.body.uid = decoded.uid;
         next();
     });
 }
