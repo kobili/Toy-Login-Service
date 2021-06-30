@@ -24,10 +24,12 @@ async function addNewUser(email: string, password: string): Promise<User | null>
             [email, uid, password]
         );
 
+        let retrievedUser = query.rows[0];
+
         let newUser: User = {
-            email: query.rows[0].email,
-            uid: query.rows[0].uid,
-            password: query.rows[0].password
+            email: retrievedUser.email,
+            uid: retrievedUser.uid,
+            password: retrievedUser.password
         };
 
         return newUser;
@@ -50,7 +52,6 @@ async function findUserByEmail(email: string): Promise<User | null>  {
             "SELECT * FROM users WHERE email = $1",
             [email]
         );
-        console.log(query);
         
         if (query.rows.length === 0) {
             return null;
@@ -67,19 +68,42 @@ async function findUserByEmail(email: string): Promise<User | null>  {
         return user;
 
     } catch (error) {
-        console.log(error.message);
+        console.error(error.message);
         return null;
     }
 }
 
-// /**
-//  * @param uuid : the id of the user to be found
-//  * Finds the user with the given id in the database
-//  * Returns the user object with the corresponding id if it exists
-//  * Otherwise return null
-//  */
-// function findUserByID(uuid: string): User | null {
-    
-// }
+/**
+ * @param uuid : the id of the user to be found
+ * Finds the user with the given id in the database
+ * Returns the user object with the corresponding id if it exists
+ * Otherwise return null
+ */
+async function findUserByID(uuid: string): Promise<User | null> {
+    try {
+        let query = await pool.query(
+            "SELECT * FROM users WHERE uid = $1",
+            [uuid]
+        );
+        
+        if (query.rows.length === 0) {
+            return null;
+        }
 
-export {addNewUser, findUserByEmail, /*findUserByID,*/ User};
+        let retrievedUser = query.rows[0];
+
+        let user : User = {
+            email: retrievedUser.email,
+            uid: retrievedUser.uid,
+            password: retrievedUser.password
+        };
+
+        return user;
+
+    } catch (error) {
+        console.error(error.message);
+        return null;
+    }
+}
+
+export {addNewUser, findUserByEmail, findUserByID, User};
