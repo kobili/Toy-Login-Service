@@ -44,14 +44,33 @@ async function addNewUser(email: string, password: string): Promise<User | null>
  * Returns the user object with the corresponding email if it exists
  * Otherwise return null
  */
-// async function findUserByEmail(email: string): Promise<User | null>  {
-//     try {
+async function findUserByEmail(email: string): Promise<User | null>  {
+    try {
+        let query = await pool.query(
+            "SELECT * FROM users WHERE email = $1",
+            [email]
+        );
+        console.log(query);
         
-//     } catch (error) {
-//         console.log(error.message);
-//         return null;
-//     }
-// }
+        if (query.rows.length === 0) {
+            return null;
+        }
+
+        let retrievedUser = query.rows[0];
+
+        let user : User = {
+            email: retrievedUser.email,
+            uid: retrievedUser.uid,
+            password: retrievedUser.password
+        };
+
+        return user;
+
+    } catch (error) {
+        console.log(error.message);
+        return null;
+    }
+}
 
 // /**
 //  * @param uuid : the id of the user to be found
@@ -63,4 +82,4 @@ async function addNewUser(email: string, password: string): Promise<User | null>
     
 // }
 
-export {addNewUser, /*findUserByEmail, findUserByID,*/ User};
+export {addNewUser, findUserByEmail, /*findUserByID,*/ User};

@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 
 const pool = require('./db');
 
-import {addNewUser, /*findUserByEmail, findUserByID,*/ User} from './User';
+import {addNewUser, findUserByEmail, /*findUserByID,*/ User} from './User';
 
 const router: Router = express.Router();
 
@@ -18,12 +18,12 @@ const superSecretAuthKey: string = "secret";                // the key used to s
  * request body needs an email and password
  * response is the newly created user if successful, null otherwise
  */
-router.post("/register", (req: Request, res: Response) => {
+router.post("/register", async (req: Request, res: Response) => {
 
     let email: string = req.body.email;
-    // if (findUserByEmail(email)) {
-    //     return res.status(409).send({error: "Error: User already exists"});
-    // }
+    if ( await findUserByEmail(email)) {
+        return res.status(409).send({error: "Error: User already exists"});
+    }
 
     let password: string = req.body.password;
 
@@ -33,7 +33,7 @@ router.post("/register", (req: Request, res: Response) => {
             return res.status(500).send({err: "Problem registering user"});
         }
 
-        let newUser = await addNewUser(email, hash);
+        let newUser : User | null = await addNewUser(email, hash);
         return res.json(newUser);
     });
 });
