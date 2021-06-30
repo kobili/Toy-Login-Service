@@ -1,12 +1,7 @@
 import express, { Application } from 'express';
-
-import {connectDB} from './db'
 import {router as UserRoute} from './UserRoute'
 
 const app: Application = express();
-
-// connect to database
-connectDB();
 
 // use routes for user endpoints
 app.use("/api/v1/user", UserRoute);
